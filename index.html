@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Advisory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Disclaimer Modal -->
+    <div id="disclaimer-modal">
+        <div class="modal-content glass-card">
+            <h2 style="display: flex; align-items: center; gap: 0.75rem;"><span class="brand-icon">🦠</span> COVID-19 Advisory System</h2>
+            <div class="disclaimer-list">
+                <div class="disclaimer-item"><div class="disclaimer-icon">📋</div><div><strong>Informational Only:</strong> This tool is not a substitute for professional medical advice.</div></div>
+                <div class="disclaimer-item"><div class="disclaimer-icon">🩺</div><div><strong>Consult a Physician:</strong> Always consult your doctor for medical decisions.</div></div>
+                <div class="disclaimer-item"><div class="disclaimer-icon">🚨</div><div><strong>Emergencies:</strong> Call emergency services immediately if you have trouble breathing.</div></div>
+                <div class="disclaimer-item"><div class="disclaimer-icon">🔬</div><div><strong>Algorithm Limitations:</strong> Scores are based on generalized weights.</div></div>
+                <div class="disclaimer-item"><div class="disclaimer-icon">📊</div><div><strong>Mock Data Notice:</strong> Regional data and clinic finders are simulations.</div></div>
+            </div>
+            <button class="btn-primary" onclick="dismissModal()">I Understand & Agree — Continue</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <div class="brand">
+                <span class="brand-icon">🦠</span>
+                <div>
+                    <h1 style="font-size: 1.25rem;">COVID-19 Advisory System</h1>
+                    <div style="font-size: 0.875rem; color: var(--text-2);">Analytics & Patient Advisory Platform</div>
+                </div>
+            </div>
+            <div class="badges">
+                <span class="badge badge-info">ℹ️ Informational Only</span>
+                <span class="badge badge-warn">🚨 Not a Diagnostic Tool</span>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">🌓</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Progress Bar -->
+        <div class="progress-container" id="progress-container">
+            <div class="progress-dots">
+                <div class="progress-line"><div class="progress-line-fill" id="progress-fill"></div></div>
+                <div class="step-dot active" id="dot-1">1</div>
+                <div class="step-dot" id="dot-2">2</div>
+            </div>
+            <div style="text-align: center; margin-top: 1rem; color: var(--text-2); font-weight: 500;" id="step-label">Step 1: Symptom Tracking</div>
+        </div>
+
+        <!-- Step 1: Symptoms -->
+        <div id="step-1" class="step-view">
+            <!-- Dynamically injected categories -->
+            <div id="symptoms-container"></div>
+            
+            <div class="glass-card" style="padding: 1.5rem; margin-top: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-weight: 500;">Selected Symptoms: <span id="symptom-count" style="color: var(--blue); font-weight: 700;">0</span></div>
+                <button class="btn-primary" style="width: auto;" onclick="goToStep2()">Next: Enter Patient Information →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Patient Info -->
+        <div id="step-2" class="step-view hidden">
+            <div class="glass-card" style="padding: 2rem;">
+                <h2 style="margin-bottom: 2rem;">Patient Information</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                    <div>
+                        <div class="form-group">
+                            <label>Age (Years)</label>
+                            <input type="number" id="age-input" class="input-base" min="1" max="120" placeholder="e.g. 45">
+                        </div>
+                        <div class="form-group">
+                            <label>Symptom Duration (Days)</label>
+                            <input type="number" id="duration-input" class="input-base" min="1" max="60" placeholder="e.g. 4">
+                        </div>
+                        <div class="form-group">
+                            <label>Vaccination Status (Completed Primary Series)</label>
+                            <div class="toggle-group" id="vax-toggles">
+                                <button class="toggle-btn" onclick="setVax(true)" id="vax-yes">Yes</button>
+                                <button class="toggle-btn active" onclick="setVax(false)" id="vax-no">No</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="form-group">
+                            <label>Pre-existing Conditions</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;" id="conditions-grid">
+                                <!-- JS Injects Conditions -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn-secondary" onclick="goToStep1()">← Back to Symptoms</button>
+                    <button class="btn-primary" onclick="analyzeData()">🔬 Analyze My Symptoms</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <!-- Emergency Banner -->
+            <div id="emergency-banner" class="emergency-banner">
+                <h2>🚨 MEDICAL EMERGENCY</h2>
+                <p>Call Emergency Services (911 / local emergency) Immediately.</p>
+            </div>
+
+            <!-- Result Hero -->
+            <div class="dashboard-hero glass-card">
+                <div class="ring-container">
+                    <svg class="ring-svg" viewBox="0 0 180 180">
+                        <circle class="ring-bg" cx="90" cy="90" r="70"></circle>
+                        <circle id="score-ring" class="ring-progress" cx="90" cy="90" r="70"></circle>
+                    </svg>
+                    <div class="ring-text">
+                        <div id="score-text" class="ring-score">0%</div>
+                        <div class="ring-label">Risk Score</div>
+                    </div>
+                </div>
+                <div>
+                    <div id="severity-badge" class="severity-badge">Detecting...</div>
+                    <p id="severity-desc" style="color: var(--text-2); margin-bottom: 1rem;"></p>
+                    <div class="meta-chips">
+                        <span class="chip" id="chip-age">Age: --</span>
+                        <span class="chip" id="chip-dur">Duration: -- days</span>
+                        <span class="chip" id="chip-vax">Vaccinated: --</span>
+                        <span class="chip" id="chip-cond">Conditions: --</span>
+                    </div>
+                    <div class="symptom-tags" id="symptom-tags-container"></div>
+                </div>
+            </div>
+
+            <!-- Action Plan Tabs -->
+            <div class="glass-card" style="padding: 2rem; margin-bottom: 2rem;">
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchTab('tab-medical')">Medical Plan</button>
+                    <button class="tab-btn" onclick="switchTab('tab-vax')">Vaccination</button>
+                    <button class="tab-btn" onclick="switchTab('tab-hygiene')">Hygiene Guide</button>
+                    <button class="tab-btn" onclick="switchTab('tab-diet')">Dietary Plan</button>
+                    <button class="tab-btn" onclick="switchTab('tab-cautions')">Cautions & Isolation</button>
+                </div>
+                
+                <div id="tab-medical" class="tab-content active"><div id="content-medical"></div></div>
+                <div id="tab-vax" class="tab-content"><div id="content-vax"></div></div>
+                <div id="tab-hygiene" class="tab-content"><div id="content-hygiene"></div></div>
+                <div id="tab-diet" class="tab-content"><div id="content-diet"></div></div>
+                <div id="tab-cautions" class="tab-content"><div id="content-cautions"></div></div>
+                
+                <div class="emergency-triggers">
+                    <h4>Emergency Triggers (Seek immediate care if any occur)</h4>
+                    <ul id="triggers-list"></ul>
+                </div>
+            </div>
+
+            <!-- Long-COVID & Regional Grid -->
+            <div class="widget-grid">
+                <div class="glass-card widget">
+                    <h3>🦠 Long-COVID Risk Analysis</h3>
+                    <div class="long-covid-score" id="lc-score">0%</div>
+                    <span id="lc-badge" class="lc-badge">Detecting...</span>
+                    <p id="lc-desc" style="color: var(--text-2); margin: 1rem 0; font-size: 0.875rem;"></p>
+                    <div style="font-weight: 500; font-size: 0.875rem;">Watch for these symptoms:</div>
+                    <div class="watch-chips" id="lc-watch"></div>
+                </div>
+                
+                <div class="glass-card widget">
+                    <h3>🌍 Regional Risk Tracker</h3>
+                    <div class="stats-grid" id="regional-grid"></div>
+                </div>
+            </div>
+
+            <!-- Clinics & Mental Health -->
+            <div class="widget-grid">
+                <div class="glass-card widget">
+                    <h3>🏥 Nearby COVID Clinics</h3>
+                    <div class="clinic-list" id="clinic-list"></div>
+                </div>
+                
+                <div class="glass-card widget">
+                    <h3>🧘 Mental Health Module</h3>
+                    <div class="clinic-list" id="mh-exercises">
+                        <!-- Accordions injected here -->
+                    </div>
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                        <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Coping Strategies</h4>
+                        <div class="mh-tips" id="mh-tips"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 4rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-secondary" style="width: auto;" onclick="resetApp()">← Start New Assessment</button>
+                <button class="btn-primary" style="width: auto;" onclick="window.print()">🖨️ Export / Print Report</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+        <h2 class="text-gradient">Analyzing Health Data</h2>
+        <p style="color: var(--text-2);">Applying predictive models to symptom profile...</p>
+    </div>
+
+    <!-- JS Logic -->
+    <script src="script.js"></script>
+</body>
+</html>
